@@ -5,13 +5,13 @@
 #include <array>
 #include <set>
 
-#define BOARD_SIZE 6
+#define BOARD_SIZE 4
 
 typedef std::vector<int> Field;
 typedef std::vector<Field> Row;
 typedef std::vector<Row> Board;
 
-static std::vector<std::vector<int>> finalBoard;
+static int finalBoard[BOARD_SIZE][BOARD_SIZE];
 
 enum class Result
 {
@@ -39,18 +39,23 @@ private:
     void finish();
 
 public:
-    PuzzleBoard(const std::vector<int> &clues);
+    PuzzleBoard(int *clues_arr);
     Result setSize(int row, int column, int setThisSize);
     int getNumberElementsInField(int row, int column);
     Field getField(int row, int column);
     void printBoard();
 };
 
-PuzzleBoard::PuzzleBoard(const std::vector<int> &clues)
+PuzzleBoard::PuzzleBoard(int *clues_arr)
 {
     Field field;
+    finalBoard[0][0] = 0;
+    std::vector<int> clues;
 
-    finalBoard.clear();
+    for (int i = 0; i < (4 * BOARD_SIZE); i++)
+    {
+        clues.push_back(clues_arr[i]);
+    }
 
     for (int i = 0; i < BOARD_SIZE; i++)
     {
@@ -165,7 +170,7 @@ Result PuzzleBoard::removeSize(int row, int column, int removeThisSize)
 
         if (totalSizes == (BOARD_SIZE * BOARD_SIZE))
         {
-            if (finalBoard.size() != (BOARD_SIZE))
+            if (finalBoard[0][0] == 0)
             {
                 finish();
             }
@@ -365,15 +370,13 @@ bool PuzzleBoard::checkColumn(int column)
 
 void PuzzleBoard::finish()
 {
+    printBoard();
     for (int i = 0; i < BOARD_SIZE; i++)
     {
-        std::vector<int> myRow;
         for (int j = 0; j < BOARD_SIZE; j++)
         {
-            myRow.push_back(board[i][j][0]);
+            finalBoard[i][j] = board[i][j][0];
         }
-        finalBoard.push_back(myRow);
-        myRow.clear();
     }
 }
 int PuzzleBoard::getNumberElementsInField(int row, int column)
@@ -468,7 +471,7 @@ Result reduceElement(PuzzleBoard temp_board)
             return Result::Finish;
         }
 
-        operation_result == reduceElement(new_board);
+        operation_result = reduceElement(new_board);
 
         if (operation_result == Result::Finish)
         {
@@ -478,52 +481,50 @@ Result reduceElement(PuzzleBoard temp_board)
     return Result::Wrong;
 }
 
-std::vector<std::vector<int>> SolvePuzzle(const std::vector<int> &clues)
+int **SolvePuzzle(int *clues)
 {
     PuzzleBoard puzzle_board(clues);
     reduceElement(puzzle_board);
-    return finalBoard;
+
+    int *ptr_array[BOARD_SIZE];
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
+        ptr_array[i] = &finalBoard[i][0];
+    }
+
+    return ptr_array;
 }
 
 int main()
 {
-    static std::vector<std::vector<int>> clues = {
-        {3, 2, 2, 3, 2, 1,
-         1, 2, 3, 3, 2, 2,
-         5, 1, 2, 2, 4, 3,
-         3, 2, 1, 2, 2, 4},
-        {0, 0, 0, 2, 2, 0,
-         0, 0, 0, 6, 3, 0,
-         0, 4, 0, 0, 0, 0,
-         4, 4, 0, 3, 0, 0},
-        {0, 3, 0, 5, 3, 4,
-         0, 0, 0, 0, 0, 1,
-         0, 3, 0, 3, 2, 3,
-         3, 2, 0, 3, 1, 0}};
 
-    static std::vector<std::vector<std::vector<int>>> expected = {
-        {{2, 1, 4, 3, 5, 6},
-         {1, 6, 3, 2, 4, 5},
-         {4, 3, 6, 5, 1, 2},
-         {6, 5, 2, 1, 3, 4},
-         {5, 4, 1, 6, 2, 3},
-         {3, 2, 5, 4, 6, 1}},
-        {{5, 6, 1, 4, 3, 2},
-         {4, 1, 3, 2, 6, 5},
-         {2, 3, 6, 1, 5, 4},
-         {6, 5, 4, 3, 2, 1},
-         {1, 2, 5, 6, 4, 3},
-         {3, 4, 2, 5, 1, 6}},
-        {{5, 2, 6, 1, 4, 3},
-         {6, 4, 3, 2, 5, 1},
-         {3, 1, 5, 4, 6, 2},
-         {2, 6, 1, 5, 3, 4},
-         {4, 3, 2, 6, 1, 5},
-         {1, 5, 4, 3, 2, 6}}};
+    int arra[5][5];
+    int(*ptrr)[5] = arra;
 
-    assert(SolvePuzzle(clues[0]) == expected[0]);
-    assert(SolvePuzzle(clues[1]) == expected[1]);
-    assert(SolvePuzzle(clues[2]) == expected[2]);
+    static int clues[][16] = {
+        {2, 2, 1, 3,
+         2, 2, 3, 1,
+         1, 2, 2, 3,
+         3, 2, 1, 3},
+        {0, 0, 1, 2,
+         0, 2, 0, 0,
+         0, 3, 0, 0,
+         0, 1, 0, 0},
+    };
+
+    int outcomes[][4][4] = {
+        {{1, 3, 4, 2},
+         {4, 2, 1, 3},
+         {3, 4, 2, 1},
+         {2, 1, 3, 4}},
+        {{2, 1, 4, 3},
+         {3, 4, 1, 2},
+         {4, 2, 3, 1},
+         {1, 3, 2, 4}},
+    };
+
+    // assert(SolvePuzzle(clues[0]) == (int **)outcomes[0]);
+    // assert(SolvePuzzle(clues[1]) == (int **)outcomes[1]);
 
     std::cout << "All test passed" << std::endl;
 }
