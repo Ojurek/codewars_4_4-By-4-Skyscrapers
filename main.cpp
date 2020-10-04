@@ -498,9 +498,6 @@ int **SolvePuzzle(int *clues)
 int main()
 {
 
-    int arra[5][5];
-    int(*ptrr)[5] = arra;
-
     static int clues[][16] = {
         {2, 2, 1, 3,
          2, 2, 3, 1,
